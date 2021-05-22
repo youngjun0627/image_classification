@@ -14,8 +14,8 @@ root = '.'
 def get_classes():
     classes = set()
 
-    train_path = './train'
-    test_path = './test'
+    train_path = '../train'
+    test_path = '../test'
 
     total_train_num = 0
     total_test_num = 0
@@ -38,7 +38,7 @@ model = MyModel(num_classes = len(classes))
 model.load_state_dict(torch.load(save_path))
 model = model.to(device)
 test_dataloader = DataLoader(test_dataset,\
-        batch_size=1,\
+        batch_size=2,\
         shuffle = False
         )
 

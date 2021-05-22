@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import timm
-
+from torchsummary import summary
 class MyModel(nn.Module):
     def __init__(self, num_classes=10):
         super().__init__()
@@ -19,4 +19,4 @@ class MyModel(nn.Module):
 
 if __name__=='__main__':
     model = MyModel()
-    print(model)
+    summary(model, (3,244,244),device='cpu')

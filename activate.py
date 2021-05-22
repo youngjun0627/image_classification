@@ -3,13 +3,14 @@ from sklearn.metrics import f1_score
 import torch.nn.functional as F
 import numpy as np
 import csv
+from tqdm import tqdm
 
 def train(model, train_dataloader, criterion, optimizer, device):
     model.train()
     preds = []
     targets = []
     running_loss = 0
-    for step, (inputs, labels) in enumerate(train_dataloader):
+    for step, (inputs, labels) in enumerate(tqdm(train_dataloader)):
         inputs = inputs.to(device)
         labels = labels.to(device)
         outputs = model(inputs)
@@ -36,7 +37,7 @@ def validation(model, validation_dataloader, criterion, optimizer, device):
     targets = []
     running_loss = 0
     with torch.no_grad():
-        for step, (inputs, labels) in enumerate(validation_dataloader):
+        for step, (inputs, labels) in enumerate(tqdm(validation_dataloader)):
             inputs = inputs.to(device)
             labels = labels.to(device)
             outputs = model(inputs)
@@ -58,16 +59,14 @@ def test(model, test_dataloader, criterion, optimizer, device):
     model.eval()
     preds = []
     with torch.no_grad():
-        for step, (inputs, _) in enumerate(test_dataloader):
+        for step, (inputs, _) in enumerate(tqdm(test_dataloader)):
             inputs = inputs.to(device)
             outputs = model(inputs)
-
             pred = torch.softmax(outputs, dim=1).detach().squeeze().cpu().numpy()
             for p in pred:
                 preds.append(np.argmax(p))
-                print(preds)
 
-    with open('result.csv', 'w', encoding='utf-8-sig', newline='') as f:
+    with open('../result.csv', 'w', encoding='utf-8-sig', newline='') as f:
         wr = csv.writer(f)
         for pred in preds:
             wr.writerow([pred])

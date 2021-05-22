@@ -44,7 +44,7 @@ class LabelSmoothCrossEntropyLoss(_WeightedLoss):
         return loss
 
 class SmoothCrossEntropyLoss(_WeightedLoss):
-    def __init__(self, weight=None, reduction='mean', smoothing=0.15):
+    def __init__(self, weight=None, reduction='mean', smoothing=0.1):
         super().__init__(weight=weight, reduction=reduction)
         self.smoothing = smoothing
         self.weight = weight

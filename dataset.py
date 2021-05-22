@@ -2,14 +2,15 @@ import os
 import csv
 import numpy as np
 import cv2
-from torch.utils.data.dataset import Dataset
+from torch.utils.data import Dataset, DataLoader
 from transform import create_train_transform, create_validation_transform
 import torch
 
 class MyDataset(Dataset):
-    def __init__(self, root='.', transform = None, mode='train', classes=None):
+    def __init__(self, root='..', transform = None, mode='train', classes=None):
         super(MyDataset, self).__init__()
         self.root = root
+        data_path = os.path.join(root,'{}.csv'.format(mode))
         self.transform = transform
         self.mode = mode
         if classes is None:
@@ -19,7 +20,6 @@ class MyDataset(Dataset):
         self.index_labels = {cls:0 for cls in classes}
         for i, cls in enumerate(classes):
             self.index_labels[cls]=i
-            data_path = '{}.csv'.format(mode)
 
         with open(data_path, 'r', encoding='utf-8-sig') as f:
             rdr = csv.reader(f)
@@ -63,9 +63,48 @@ class MyDataset(Dataset):
         normedWeights = [1 - (x / sum(weights)) for x in weights]
         return normedWeights
 
+def mean_std(train_dataloader):
+    mean0 = 0
+    mean1 = 0
+    mean2 = 0
+    std0 = 0
+    std1 = 0
+    std2 = 0
 
+    for image, _ in train_dataloader:
+        mean0+=image[:,0,:,:].mean()
+        mean1+=image[:,1,:,:].mean()
+        mean2+=image[:,2,:,:].mean()
+        std0+=image[:,0,:,:].std()
+        std1+=image[:,1,:,:].std()
+        std2+=image[:,2,:,:].std()
+
+    print(mean0/len(train_dataloader))
+    print(mean1/len(train_dataloader))
+    print(mean2/len(train_dataloader))
+    print(std0/len(train_dataloader))
+    print(std1/len(train_dataloader))
+    print(std2/len(train_dataloader))
 if __name__=='__main__':
 
+    classes = set()
+
+    train_path = '../train'
+    test_path = '../test'
+
+    total_train_num = 0
+    total_test_num = 0
+    for label in os.listdir(train_path):
+        classes.add(label)
+        image_num = len(os.listdir(os.path.join(train_path,label)))
+        total_train_num += image_num
+        print('train dataset size : {} -> {}'.format(label,image_num))
+
+    train_transform = create_train_transform(True, True, True, True)
+    train_dataset = MyDataset(transform = train_transform, classes = classes)
+    train_dataloader = DataLoader(train_dataset, batch_size=16)
+    mean_std(train_dataloader)
+    '''
     classes = set()
 
     train_path = './train'
@@ -96,3 +135,4 @@ if __name__=='__main__':
     print(len(test_dataset))
     print(train_dataset.get_class_weights())
     print(train_dataset.get_class_weights2())
+    '''

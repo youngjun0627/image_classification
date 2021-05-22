@@ -8,19 +8,19 @@ from torch.utils.data import DataLoader
 import os
 from activate import train, validation
 
-save_path = './latest.pth'
+save_path = '../latest.pth'
 device = torch.device('cuda:0')
 num_classes = 10
 root = '.'
-BATCHSIZE = 32
+BATCHSIZE = 64
 LR = 0.01
-EPOCHS = 30
+EPOCHS = 10
 
 def get_classes():
     classes = set()
 
-    train_path = './train'
-    test_path = './test'
+    train_path = '../train'
+    test_path = '../test'
 
     total_train_num = 0
     total_test_num = 0
@@ -42,14 +42,16 @@ train_dataset = MyDataset(transform = train_transform, classes = classes)
 validation_transform = create_validation_transform(True)
 validation_dataset = MyDataset(transform = validation_transform, mode = 'validation', classes = classes)
 model = MyModel(num_classes = len(classes)).to(device)
-criterion = MyLoss2(weights = torch.tensor(train_dataset.get_class_weights2(), dtype=torch.float32).to(device))
-#criterion = MyLoss1(weights = torch.tensor(train_dataset.get_class_weights(), dtype=torch.float32).to(device))
+criterion = MyLoss1(weights = torch.tensor(train_dataset.get_class_weights(), dtype=torch.float32).to(device))
+#criterion = MyLoss2(weights = torch.tensor(train_dataset.get_class_weights2(), dtype=torch.float32).to(device))
 optimizer = optim.SGD(model.parameters(), lr = LR)
-scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience=2, factor = 0.5)
-
+#scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', patience=2, factor = 0.5)
+scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
+#scheduler = optim.lr_scheduler.MultiStepLR(optimizer, milestones=[10,15,20,25,30], gamma=0.1)
 train_dataloader = DataLoader(train_dataset,\
         batch_size = BATCHSIZE,\
-        shuffle = True
+        shuffle = True,
+        num_workers=4
         )
 validation_dataloader = DataLoader(validation_dataset,\
         batch_size = BATCHSIZE,\
